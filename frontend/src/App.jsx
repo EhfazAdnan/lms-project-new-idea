@@ -1,17 +1,17 @@
-import { useState } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Home from './components/pages/Home'
-import Courses from './components/pages/Courses'
-import Detail from './components/pages/Detail'
-import Login from './components/pages/Login'
-import Register from './components/pages/Register'
-import MyCourses from './components/pages/account/MyCourses'
-import MyLearning from './components/pages/account/MyLearning'
-import WatchCourse from './components/pages/account/WatchCourse'
-import ChangePassword from './components/pages/account/ChangePassword'
+import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./components/pages/Home";
+import Courses from "./components/pages/Courses";
+import Detail from "./components/pages/Detail";
+import Login from "./components/pages/Login";
+import Register from "./components/pages/Register";
+import MyCourses from "./components/pages/account/MyCourses";
+import MyLearning from "./components/pages/account/MyLearning";
+import WatchCourse from "./components/pages/account/WatchCourse";
+import ChangePassword from "./components/pages/account/ChangePassword";
+import { Toaster } from "react-hot-toast";
 
 function App() {
-
   return (
     <>
       <BrowserRouter>
@@ -19,7 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/detail" element={<Detail />} />
-          
+
           <Route path="/account/login" element={<Login />} />
           <Route path="/account/register" element={<Register />} />
 
@@ -29,8 +29,9 @@ function App() {
           <Route path="/account/change-password" element={<ChangePassword />} />
         </Routes>
       </BrowserRouter>
+      <Toaster position="top-center" reverseOrder={false} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
