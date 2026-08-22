@@ -22,14 +22,14 @@ const Register = () => {
     })
     .then((response) => response.json())
     .then((data) => {
-      if (data.status === 400) {
-        Object.keys(data.errors).forEach((field) => {
-          setError(field, { type: "manual", message: data.errors[field][0] });
-        });
-      } else {
+      if (data.status === 200) {
         // Handle successful registration (e.g., redirect to login page)
         toast.success(data.message);
         navigate("/account/login");
+      } else {
+         Object.keys(data.errors).forEach((field) => {
+          setError(field, { type: "manual", message: data.errors[field][0] });
+        });
       }
     });
   }
