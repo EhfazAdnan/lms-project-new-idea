@@ -8,13 +8,13 @@ import { useEffect } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { BsPencilSquare } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
-import UpdateOutcome from "./UpdateOutcome";
 import { Link } from "react-router-dom";
+import UpdateRequirement from "./UpdateRequirement";
 
-const ManageOutcome = () => {
+const ManageRequirement = () => {
   const [loading, setLoading] = useState(false);
-  const [outcomes, setOutcomes] = useState([]);
-  const [outcomeData, setOutcomeData] = useState({});
+  const [requirements, setRequirements] = useState([]);
+  const [requirementData, setRequirementData] = useState({});
   const {
     register,
     handleSubmit,
@@ -23,11 +23,11 @@ const ManageOutcome = () => {
   } = useForm();
   const params = useParams();
 
-  const [showOutcome, setShowOutcome] = useState(false);
-  const handleCloseOutcome = () => setShowOutcome(false);
-  const handleShowOutcome = (outcome) => {
-    setShowOutcome(true);
-    setOutcomeData(outcome);
+  const [showRequirement, setShowRequirement] = useState(false);
+  const handleCloseRequirement = () => setShowRequirement(false);
+  const handleShowRequirement = (requirement) => {
+    setShowRequirement(true);
+    setRequirementData(requirement);
   };
 
   const onSubmit = async (data) => {
@@ -35,7 +35,7 @@ const ManageOutcome = () => {
 
     const formData = { ...data, course_id: params.id };
 
-    await fetch(`${apiUrl}/outcomes`, {
+    await fetch(`${apiUrl}/requirements`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -47,19 +47,19 @@ const ManageOutcome = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 200) {
-          setOutcomes([...outcomes, data.data]);
+          setRequirements([...requirements, data.data]);
           setLoading(false);
           reset();
-          toast.success("Outcome added successfully");
+          toast.success("Requirement added successfully");
         } else {
-          setError("outcome", { message: data.message });
+          setError("requirement", { message: data.message });
           setLoading(false);
         }
       });
   };
 
-  const fetchOutcomes = async () => {
-    await fetch(`${apiUrl}/outcomes?course_id=${params.id}`, {
+  const fetchRequirements = async () => {
+    await fetch(`${apiUrl}/requirements?course_id=${params.id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -70,26 +70,26 @@ const ManageOutcome = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 200) {
-          setOutcomes(data.data);
+          setRequirements(data.data);
         } else {
-          toast.error("Failed to load outcomes");
+          toast.error("Failed to load requirements");
         }
       });
   };
 
   useEffect(() => {
-    fetchOutcomes();
+    fetchRequirements();
   }, []);
-
-  const handleDeleteOutcome = (id) => {
+  
+  const handleDeleteRequirement = (id) => {
     // confirmation dialog
-    if (confirm("Are you sure you want to delete this outcome?")) {
-      deleteOutcome(id);
+    if (confirm("Are you sure you want to delete this requirement?")) {
+      deleteRequirement(id);
     }
   };
 
-  const deleteOutcome = async (id) => {
-    fetch(`${apiUrl}/outcomes/${id}`, {
+  const deleteRequirement = async (id) => {
+    fetch(`${apiUrl}/requirements/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -100,31 +100,33 @@ const ManageOutcome = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 200) {
-          setOutcomes(outcomes.filter((outcome) => outcome.id !== id));
-          toast.success("Outcome deleted successfully");
+          setRequirements(requirements.filter((requirement) => requirement.id !== id));
+          toast.success("Requirement deleted successfully");
         } else {
-          toast.error("Failed to delete outcome");
+          toast.error("Failed to delete requirement");
         }
       });
-  };
+  }
 
   return (
     <>
-      <div className="card border-0 shadow-lg">
+      <div className="card border-0 shadow-lg mt-4">
         <div className="card-body p-4">
           <div className="d-flex">
-            <h4 className="h5 mb-3">Outcome</h4>
+            <h4 className="h5 mb-3">Requirement</h4>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
               <input
-                {...register("outcome", { required: "Outcome is required" })}
+                {...register("requirement", {
+                  required: "Requirement is required",
+                })}
                 type="text"
-                className={`form-control ${errors.outcome && "is-invalid"}`}
-                placeholder="Enter outcome"
+                className={`form-control ${errors.requirement && "is-invalid"}`}
+                placeholder="Enter requirement"
               />
-              {errors.outcome && (
-                <p className="invalid-feedback">Outcome is required</p>
+              {errors.requirement && (
+                <p className="invalid-feedback">Requirement is required</p>
               )}
             </div>
             <button
@@ -136,22 +138,28 @@ const ManageOutcome = () => {
             </button>
           </form>
 
-          {outcomes.length > 0 && (
+          {requirements.length > 0 && (
             <div className="mt-3">
-              <h4 className="h5 mb-3">Outcomes</h4>
-              {outcomes.map((outcome) => (
-                <div className="card shadow-lg mt-3" key={outcome.id}>
+              <h4 className="h5 mb-3">Requirements</h4>
+              {requirements.map((requirement) => (
+                <div className="card shadow-lg mt-3" key={requirement.id}>
                   <div className="card-body p-2 d-flex">
                     <div>
                       <MdDragIndicator className="text-primary" />
                     </div>
                     <div className="d-flex justify-content-between w-100">
-                      <div>{outcome.text}</div>
+                      <div>{requirement.text}</div>
                       <div className="d-flex">
-                        <Link onClick={() => handleShowOutcome(outcome)}>
+                        <Link
+                          onClick={() => handleShowRequirement(requirement)}
+                        >
                           <BsPencilSquare className="text-primary me-2" />
                         </Link>
-                        <Link onClick={() => handleDeleteOutcome(outcome.id)}>
+                        <Link
+                          onClick={() =>
+                            handleDeleteRequirement(requirement.id)
+                          }
+                        >
                           <FaTrashAlt className="text-danger" />
                         </Link>
                       </div>
@@ -165,9 +173,15 @@ const ManageOutcome = () => {
       </div>
 
       {/* Modal */}
-      <UpdateOutcome outcomeData={outcomeData} showOutcome={showOutcome} handleCloseOutcome={handleCloseOutcome} outcomes={outcomes} setOutcomes={setOutcomes} />
+      <UpdateRequirement
+        showRequirement={showRequirement}
+        requirementData={requirementData}
+        handleCloseRequirement={handleCloseRequirement}
+        requirements={requirements}
+        setRequirements={setRequirements}
+      />
     </>
   );
 };
 
-export default ManageOutcome;
+export default ManageRequirement;
