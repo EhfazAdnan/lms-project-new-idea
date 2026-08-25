@@ -8,10 +8,13 @@ import { useEffect } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { BsPencilSquare } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
+import UpdateOutcome from "./UpdateOutcome";
+import { Link } from "react-router-dom";
 
 const ManageOutcome = () => {
   const [loading, setLoading] = useState(false);
   const [outcomes, setOutcomes] = useState([]);
+  const [outcomeData, setOutcomeData] = useState({});
   const {
     register,
     handleSubmit,
@@ -19,6 +22,13 @@ const ManageOutcome = () => {
     reset,
   } = useForm();
   const params = useParams();
+
+  const [showOutcome, setShowOutcome] = useState(false);
+  const handleCloseOutcome = () => setShowOutcome(false);
+  const handleShowOutcome = (outcome) => {
+    setShowOutcome(true);
+    setOutcomeData(outcome);
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -73,56 +83,92 @@ const ManageOutcome = () => {
     fetchOutcomes();
   }, []);
 
-  return (
-    <div className="card border-0 shadow-lg">
-      <div className="card-body p-4">
-        <div className="d-flex">
-          <h4 className="h5 mb-3">Outcome</h4>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="mb-3">
-            <input
-              {...register("outcome", { required: "Outcome is required" })}
-              type="text"
-              className={`form-control ${errors.outcome && "is-invalid"}`}
-              placeholder="Enter outcome"
-            />
-            {errors.outcome && (
-              <p className="invalid-feedback">Outcome is required</p>
-            )}
-          </div>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? "Loading..." : "Add"}
-          </button>
-        </form>
+  const handleDeleteOutcome = (id) => {
+    // confirmation dialog
+    if (confirm("Are you sure you want to delete this outcome?")) {
+      deleteOutcome(id);
+    }
+  };
 
-        {outcomes.length > 0 && (
-          <div className="mt-3">
-            <h4 className="h5 mb-3">Outcomes</h4>
-            {outcomes.map((outcome) => (
-              <div className="card shadow-lg mt-3" key={outcome.id}>
-                <div className="card-body p-2 d-flex">
-                  <div>
-                    <MdDragIndicator className="text-primary" />
-                  </div>
-                  <div className="d-flex justify-content-between w-100">
-                    <div>{outcome.text}</div>
-                    <div className="d-flex">
-                      <a href="#" className="text-primary me-2">
-                        <BsPencilSquare className="text-primary" />
-                      </a>
-                      <a>
-                        <FaTrashAlt className="text-danger" />
-                      </a>
+  const deleteOutcome = async (id) => {
+    fetch(`${apiUrl}/outcomes/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 200) {
+          setOutcomes(outcomes.filter((outcome) => outcome.id !== id));
+          toast.success("Outcome deleted successfully");
+        } else {
+          toast.error("Failed to delete outcome");
+        }
+      });
+  };
+
+  return (
+    <>
+      <div className="card border-0 shadow-lg">
+        <div className="card-body p-4">
+          <div className="d-flex">
+            <h4 className="h5 mb-3">Outcome</h4>
+          </div>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="mb-3">
+              <input
+                {...register("outcome", { required: "Outcome is required" })}
+                type="text"
+                className={`form-control ${errors.outcome && "is-invalid"}`}
+                placeholder="Enter outcome"
+              />
+              {errors.outcome && (
+                <p className="invalid-feedback">Outcome is required</p>
+              )}
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading}
+            >
+              {loading ? "Loading..." : "Add"}
+            </button>
+          </form>
+
+          {outcomes.length > 0 && (
+            <div className="mt-3">
+              <h4 className="h5 mb-3">Outcomes</h4>
+              {outcomes.map((outcome) => (
+                <div className="card shadow-lg mt-3" key={outcome.id}>
+                  <div className="card-body p-2 d-flex">
+                    <div>
+                      <MdDragIndicator className="text-primary" />
+                    </div>
+                    <div className="d-flex justify-content-between w-100">
+                      <div>{outcome.text}</div>
+                      <div className="d-flex">
+                        <Link onClick={() => handleShowOutcome(outcome)}>
+                          <BsPencilSquare className="text-primary me-2" />
+                        </Link>
+                        <Link onClick={() => handleDeleteOutcome(outcome.id)}>
+                          <FaTrashAlt className="text-danger" />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Modal */}
+      <UpdateOutcome outcomeData={outcomeData} showOutcome={showOutcome} handleCloseOutcome={handleCloseOutcome} outcomes={outcomes} setOutcomes={setOutcomes} />
+    </>
   );
 };
 
