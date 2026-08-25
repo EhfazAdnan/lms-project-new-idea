@@ -97,4 +97,19 @@ class RequirementController extends Controller
             'message' => 'Requirement deleted successfully'
         ], 200);
     }
+
+    public function sortRequirements(Request $request) {
+        if (!empty($request->requirements)) {
+            foreach ($request->requirements as $key => $requirement) {
+                Requirement::where('id', $requirement['id'])->update([
+                    'sort_order' => $key
+                ]);
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Requirements sorted successfully'
+        ], 200);
+    }
 }

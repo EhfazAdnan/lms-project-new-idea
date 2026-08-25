@@ -10,6 +10,7 @@ import { BsPencilSquare } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import UpdateRequirement from "./UpdateRequirement";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ManageRequirement = () => {
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,39 @@ const ManageRequirement = () => {
   const handleShowRequirement = (requirement) => {
     setShowRequirement(true);
     setRequirementData(requirement);
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const reorderedItems = Array.from(requirements);
+    const [movedItem] = reorderedItems.splice(result.source.index, 1);
+    reorderedItems.splice(result.destination.index, 0, movedItem);
+
+    setRequirements(reorderedItems);
+    saveOrder(reorderedItems);
+  };
+
+  const saveOrder = async (updatedRequirements) => {
+    await fetch(`${apiUrl}/sort-requirements`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ requirements: updatedRequirements }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 200) {
+          toast.success("Requirements sorted successfully");
+        } else {
+          toast.error("Failed to sort requirements");
+        }
+      });
   };
 
   const onSubmit = async (data) => {
@@ -138,37 +172,58 @@ const ManageRequirement = () => {
             </button>
           </form>
 
-          {requirements.length > 0 && (
-            <div className="mt-3">
-              <h4 className="h5 mb-3">Requirements</h4>
-              {requirements.map((requirement) => (
-                <div className="card shadow-lg mt-3" key={requirement.id}>
-                  <div className="card-body p-2 d-flex">
-                    <div>
-                      <MdDragIndicator className="text-primary" />
-                    </div>
-                    <div className="d-flex justify-content-between w-100">
-                      <div>{requirement.text}</div>
-                      <div className="d-flex">
-                        <Link
-                          onClick={() => handleShowRequirement(requirement)}
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="list">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-2"
+                >
+                  {requirements.map((requirement, index) => (
+                    <Draggable
+                      key={requirement.id}
+                      draggableId={`${requirement.id}`}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="mt-2 border px-3 py-2 bg-white shadow-lg  rounded"
                         >
-                          <BsPencilSquare className="text-primary me-2" />
-                        </Link>
-                        <Link
-                          onClick={() =>
-                            handleDeleteRequirement(requirement.id)
-                          }
-                        >
-                          <FaTrashAlt className="text-danger" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                          <div className="card-body p-2 d-flex">
+                            <div>
+                              <MdDragIndicator className="text-primary" />
+                            </div>
+                            <div className="d-flex justify-content-between w-100">
+                              <div>{requirement.text}</div>
+                              <div className="d-flex">
+                                <Link
+                                  onClick={() => handleShowRequirement(requirement)}
+                                >
+                                  <BsPencilSquare className="text-primary me-2" />
+                                </Link>
+                                <Link
+                                  onClick={() =>
+                                    handleDeleteRequirement(requirement.id)
+                                  }
+                                >
+                                  <FaTrashAlt className="text-danger" />
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
 

@@ -10,6 +10,7 @@ import { BsPencilSquare } from "react-icons/bs";
 import { FaTrashAlt } from "react-icons/fa";
 import UpdateOutcome from "./UpdateOutcome";
 import { Link } from "react-router-dom";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const ManageOutcome = () => {
   const [loading, setLoading] = useState(false);
@@ -28,6 +29,40 @@ const ManageOutcome = () => {
   const handleShowOutcome = (outcome) => {
     setShowOutcome(true);
     setOutcomeData(outcome);
+  };
+
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const reorderedItems = Array.from(outcomes);
+    const [movedItem] = reorderedItems.splice(result.source.index, 1);
+    reorderedItems.splice(result.destination.index, 0, movedItem);
+
+    setOutcomes(reorderedItems);
+    saveOrder(reorderedItems);
+  };
+
+  const saveOrder = async (updatedOutcomes) => {
+    await fetch(`${apiUrl}/sort-outcomes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ outcomes: updatedOutcomes }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 200) {
+          toast.success("Outcomes sorted successfully");
+        } else {
+          toast.error("Failed to sort outcomes");
+        }
+      });
+    
   };
 
   const onSubmit = async (data) => {
@@ -136,36 +171,69 @@ const ManageOutcome = () => {
             </button>
           </form>
 
-          {outcomes.length > 0 && (
-            <div className="mt-3">
-              <h4 className="h5 mb-3">Outcomes</h4>
-              {outcomes.map((outcome) => (
-                <div className="card shadow-lg mt-3" key={outcome.id}>
-                  <div className="card-body p-2 d-flex">
-                    <div>
-                      <MdDragIndicator className="text-primary" />
-                    </div>
-                    <div className="d-flex justify-content-between w-100">
-                      <div>{outcome.text}</div>
-                      <div className="d-flex">
-                        <Link onClick={() => handleShowOutcome(outcome)}>
-                          <BsPencilSquare className="text-primary me-2" />
-                        </Link>
-                        <Link onClick={() => handleDeleteOutcome(outcome.id)}>
-                          <FaTrashAlt className="text-danger" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="list">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-2"
+                >
+                  {outcomes.map((outcome, index) => (
+                    <Draggable
+                      key={outcome.id}
+                      draggableId={`${outcome.id}`}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                          className="mt-2 border px-3 py-2 bg-white shadow-lg  rounded"
+                        >
+                          <div className="card-body p-2 d-flex">
+                            <div>
+                              <MdDragIndicator className="text-primary" />
+                            </div>
+                            <div className="d-flex justify-content-between w-100">
+                              <div>{outcome.text}</div>
+                              <div className="d-flex">
+                                <Link
+                                  onClick={() => handleShowOutcome(outcome)}
+                                >
+                                  <BsPencilSquare className="text-primary me-2" />
+                                </Link>
+                                <Link
+                                  onClick={() =>
+                                    handleDeleteOutcome(outcome.id)
+                                  }
+                                >
+                                  <FaTrashAlt className="text-danger" />
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
 
       {/* Modal */}
-      <UpdateOutcome outcomeData={outcomeData} showOutcome={showOutcome} handleCloseOutcome={handleCloseOutcome} outcomes={outcomes} setOutcomes={setOutcomes} />
+      <UpdateOutcome
+        outcomeData={outcomeData}
+        showOutcome={showOutcome}
+        handleCloseOutcome={handleCloseOutcome}
+        outcomes={outcomes}
+        setOutcomes={setOutcomes}
+      />
     </>
   );
 };
