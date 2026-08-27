@@ -20,6 +20,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/courses/meta-data', [CourseController::class, 'metaData']);
     Route::get('/courses/{id}', [CourseController::class, 'show']);
     Route::put('/courses/{id}', [CourseController::class, 'update']);
+    Route::post('/save-course-image/{id}', [CourseController::class, 'saveCourseImage']);
 
     // outcome routes
     Route::get('/outcomes', [OutcomeController::class, 'index']);

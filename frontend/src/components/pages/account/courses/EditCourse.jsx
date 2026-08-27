@@ -7,6 +7,7 @@ import { apiUrl, token } from "../../common/Config";
 import { toast } from "react-hot-toast";
 import ManageOutcome from "./ManageOutcome";
 import ManageRequirement from "./ManageRequirement";
+import EditCover from "./EditCover";
 
 const EditCourse = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const EditCourse = () => {
   const [levels, setLevels] = useState([]);
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [course, setCourse] = useState([]);
 
   // useForm
   const {
@@ -66,6 +68,7 @@ const EditCourse = () => {
             sell_price: courseData.data.price,
             cross_price: courseData.data.cross_price,
           });
+          setCourse(courseData.data);
         } else {
           toast.error("Course not found");
         }
@@ -314,6 +317,7 @@ const EditCourse = () => {
                 <div className="col-md-5">
                   <ManageOutcome />
                   <ManageRequirement />
+                  <EditCover course={course} setCourse={setCourse} />
                 </div>
               </div>
             </div>
