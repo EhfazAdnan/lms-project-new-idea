@@ -6,6 +6,7 @@ use App\Http\Controllers\front\AccountController;
 use App\Http\Controllers\front\CourseController;
 use App\Http\Controllers\front\OutcomeController;
 use App\Http\Controllers\front\RequirementController;
+use App\Http\Controllers\front\ChapterController;
 
 Route::post('/register', [AccountController::class, 'register']);
 Route::post('/login', [AccountController::class, 'authenticate']);
@@ -35,4 +36,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::put('/requirements/{id}', [RequirementController::class, 'update']);
     Route::delete('/requirements/{id}', [RequirementController::class, 'destroy']);
     Route::post('/sort-requirements', [RequirementController::class, 'sortRequirements']);
+
+    // chapter routes
+    Route::get('/chapters', [ChapterController::class, 'index']);
+    Route::post('/chapters', [ChapterController::class, 'store']);
+    Route::put('/chapters/{id}', [ChapterController::class, 'update']);
+    Route::delete('/chapters/{id}', [ChapterController::class, 'destroy']);
+    Route::post('/sort-chapters', [ChapterController::class, 'sortChapters']);
 });

@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 import ManageOutcome from "./ManageOutcome";
 import ManageRequirement from "./ManageRequirement";
 import EditCover from "./EditCover";
+import ManageChapter from "./ManageChapter";
 
 const EditCourse = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const EditCourse = () => {
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [course, setCourse] = useState([]);
+  const params = useParams();
 
   // useForm
   const {
@@ -313,6 +315,7 @@ const EditCourse = () => {
                       </div>
                     </div>
                   </form>
+                  <ManageChapter course={course} params={params} />
                 </div>
                 <div className="col-md-5">
                   <ManageOutcome />
