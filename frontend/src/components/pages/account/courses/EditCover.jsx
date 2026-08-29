@@ -19,10 +19,10 @@ const EditCover = ( { course, setCourse } ) => {
 
   return (
     <>
-      <div className="card border-0 shadow-lg">
+      <div className="card border-0 shadow-lg mt-4">
         <div className="card-body p-4">
           <div className="d-flex">
-            <h4>Upload Cover Image</h4>
+            <h5>Upload Cover Image</h5>
           </div>
 
           <FilePond

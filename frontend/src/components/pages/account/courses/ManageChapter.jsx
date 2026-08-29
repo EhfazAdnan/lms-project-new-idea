@@ -5,8 +5,11 @@ import { apiUrl, token } from "../../common/Config";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
+import Accordion from "react-bootstrap/Accordion";
+import { useReducer } from "react";
+import UpdateChapter from "./UpdateChapter";
 
-const ManageChapter = ( { course, params } ) => {
+const ManageChapter = ({ course, params }) => {
   const {
     register,
     handleSubmit,
@@ -14,6 +17,32 @@ const ManageChapter = ( { course, params } ) => {
     reset,
   } = useForm();
   const [loading, setLoading] = useState(false);
+  const [chapterData, setChapterData] = useState(null);
+
+  const [showChapter, setShowChapter] = useState(false);
+  const handleCloseChapter = () => setShowChapter(false);
+  const handleShowChapter = (chapter) => {
+    setShowChapter(true);
+    setChapterData(chapter);
+  };
+
+  const chaptersReducer = (state, action) => {
+    switch (action.type) {
+      case "SET_CHAPTERS":
+        return action.payload;
+      case "ADD_CHAPTER":
+        return [...state, action.payload];
+      case "UPDATE_CHAPTER":
+        return state.map((chapter) =>
+          chapter.id === action.payload.id ? action.payload : chapter,
+        );
+      case "DELETE_CHAPTER":
+        return state.filter((chapter) => chapter.id !== action.payload);
+      default:
+        return state;
+    }
+  };
+  const [chapters, setChapters] = useReducer(chaptersReducer, []);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -32,6 +61,7 @@ const ManageChapter = ( { course, params } ) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 200) {
+          setChapters({ type: "ADD_CHAPTER", payload: data.data });
           toast.success("Chapter added successfully");
           setLoading(false);
           reset();
@@ -41,6 +71,39 @@ const ManageChapter = ( { course, params } ) => {
         }
       });
   };
+
+  const onDeleteChapter = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this chapter?")) {
+      return;
+    }
+    setLoading(true);
+
+    await fetch(`${apiUrl}/chapters/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 200) {
+          setChapters({ type: "DELETE_CHAPTER", payload: id });
+          toast.success("Chapter deleted successfully");
+          setLoading(false);
+        } else {
+          setError("chapter", { message: data.message });
+          setLoading(false);
+        }
+      });
+  };
+
+  useEffect(() => {
+    if (course.chapters) {
+      setChapters({ type: "SET_CHAPTERS", payload: course.chapters });
+    }
+  }, [course]);
 
   return (
     <>
@@ -69,8 +132,38 @@ const ManageChapter = ( { course, params } ) => {
               {loading ? "Loading..." : "Add"}
             </button>
           </form>
+
+          <Accordion className="mt-3">
+            {chapters.map((chapter, index) => (
+              <Accordion.Item eventKey={index} key={index}>
+                <Accordion.Header>{chapter.title}</Accordion.Header>
+                <Accordion.Body>
+                  <div className="d-flex">
+                    <button
+                      onClick={() => onDeleteChapter(chapter.id)}
+                      className="btn btn-danger btn-sm"
+                    >
+                      Delete Chapter
+                    </button>
+                    <button
+                      onClick={() => handleShowChapter(chapter)}
+                      className="btn btn-primary btn-sm ms-2"
+                    >
+                      Update Chapter
+                    </button>
+                  </div>
+                </Accordion.Body>
+              </Accordion.Item>
+            ))}
+          </Accordion>
         </div>
       </div>
+      <UpdateChapter
+        chapterData={chapterData}
+        showChapter={showChapter}
+        handleCloseChapter={handleCloseChapter}
+        setChapters={setChapters}
+      />
     </>
   );
 };

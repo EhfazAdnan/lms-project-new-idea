@@ -16,4 +16,9 @@ class Course extends Model
 
         return asset('uploads/courses/small/'.$this->image);
     }
+
+    public function chapters()
+    {
+        return $this->hasMany(Chapter::class);
+    }
 }
