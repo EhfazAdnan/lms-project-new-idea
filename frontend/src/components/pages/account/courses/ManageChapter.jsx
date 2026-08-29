@@ -8,6 +8,9 @@ import { useEffect } from "react";
 import Accordion from "react-bootstrap/Accordion";
 import { useReducer } from "react";
 import UpdateChapter from "./UpdateChapter";
+import CreateLesson from "./CreateLesson";
+import { Link } from "react-router-dom";
+import { FaPlus } from "react-icons/fa";
 
 const ManageChapter = ({ course, params }) => {
   const {
@@ -19,11 +22,19 @@ const ManageChapter = ({ course, params }) => {
   const [loading, setLoading] = useState(false);
   const [chapterData, setChapterData] = useState(null);
 
+  // update chapter modal
   const [showChapter, setShowChapter] = useState(false);
   const handleCloseChapter = () => setShowChapter(false);
   const handleShowChapter = (chapter) => {
     setShowChapter(true);
     setChapterData(chapter);
+  };
+
+  // create lesson modal
+  const [showLessonModel, setShowLessonModel] = useState(false);
+  const handleCloseLessonModel = () => setShowLessonModel(false);
+  const handleShowLessonModel = () => {
+    setShowLessonModel(true);
   };
 
   const chaptersReducer = (state, action) => {
@@ -110,7 +121,12 @@ const ManageChapter = ({ course, params }) => {
       <div className="card border-0 shadow-lg mt-4">
         <div className="card-body p-4">
           <div className="d-flex">
-            <h4 className="h5 mb-3">Chapters</h4>
+            <div className="d-flex justify-content-between w-100">
+              <h4 className="h5 mb-3">Chapters</h4>
+              <Link onClick={handleShowLessonModel}>
+                <FaPlus size={12} /> Add Lesson
+              </Link>
+            </div>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
@@ -163,6 +179,12 @@ const ManageChapter = ({ course, params }) => {
         showChapter={showChapter}
         handleCloseChapter={handleCloseChapter}
         setChapters={setChapters}
+      />
+
+      <CreateLesson
+        showLessonModel={showLessonModel}
+        handleCloseLessonModel={handleCloseLessonModel}
+        course={course}
       />
     </>
   );
