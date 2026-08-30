@@ -11,6 +11,8 @@ import UpdateChapter from "./UpdateChapter";
 import CreateLesson from "./CreateLesson";
 import { Link } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
+import { BsPencilSquare } from "react-icons/bs";
+import { FaTrashAlt } from "react-icons/fa";
 
 const ManageChapter = ({ course, params }) => {
   const {
@@ -154,19 +156,51 @@ const ManageChapter = ({ course, params }) => {
               <Accordion.Item eventKey={index} key={index}>
                 <Accordion.Header>{chapter.title}</Accordion.Header>
                 <Accordion.Body>
-                  <div className="d-flex">
-                    <button
-                      onClick={() => onDeleteChapter(chapter.id)}
-                      className="btn btn-danger btn-sm"
-                    >
-                      Delete Chapter
-                    </button>
-                    <button
-                      onClick={() => handleShowChapter(chapter)}
-                      className="btn btn-primary btn-sm ms-2"
-                    >
-                      Update Chapter
-                    </button>
+                  <div className="row">
+                    <div className="col-md-12">
+                      <div className="d-flex justify-content-between">
+                        <h4 className="h5 mb-3">Lessons</h4>
+                        <a className="h6" href="" data-discover="true">
+                          <strong>Reorder Lessons</strong>
+                        </a>
+                      </div>
+                      {chapter.lessons &&
+                        chapter.lessons.map((lesson, index) => {
+                          return <div className="card shadow-sm px-3 py-2 mb-2">
+                            <div className="row">
+                              <div className="col-md-7">
+                                {lesson.title}
+                              </div>
+                              <div className="col-md-5 text-end">
+                                {
+                                  lesson.duration && <small className="fw-bold text-muted me-2">20 Mins</small>
+                                }
+                                {
+                                  lesson.is_free_preview == "yes" && <span className="badge bg-success">Preview</span>
+                                }
+                                <Link className="ms-2"><BsPencilSquare size={12} /></Link>
+                                <Link className="ms-2 text-danger"><FaTrashAlt size={12} /></Link>
+                              </div>
+                            </div>
+                          </div>
+                        })}
+                    </div>
+                    <div className="col-md-12 mt-2">
+                      <div className="d-flex">
+                        <button
+                          onClick={() => onDeleteChapter(chapter.id)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          Delete Chapter
+                        </button>
+                        <button
+                          onClick={() => handleShowChapter(chapter)}
+                          className="btn btn-primary btn-sm ms-2"
+                        >
+                          Update Chapter
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </Accordion.Body>
               </Accordion.Item>
